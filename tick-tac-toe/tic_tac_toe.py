@@ -8,27 +8,25 @@ This is the "tic-tac-toe game" module.
 x = 'X'
 o = 'O'
 
-# user mark
-mark = x
-
 
 def main():
 
     global field
+    field = '         '
+    global mark
+    mark = x
 
-    # Get the 3x3 field from the input.
-    field = input("Enter cells: ")
-
-    # Output this 3x3 field with cells before the user's move.
     print_field()
 
-    # Ask the user about his next move.
-    r, c = get_coordinates()
-
-    update_field(r, c, mark)
-
-    # Output this 3x3 field with cells after the user's move.
-    print_field()
+    while True:
+        r, c = get_coordinates(mark)
+        update_field(r, c, mark)
+        result = get_result()
+        print_field()
+        if result != "Game not finished":
+            break
+        change_player()
+    print(result)
 
 
 def print_field():
@@ -39,10 +37,10 @@ def print_field():
     print('---------')
 
 
-def get_coordinates():
+def get_coordinates(mark):
     while True:
         try:
-            c, r = input("Enter the coordinates: ").split()
+            c, r = input(f"Enter the coordinates for {mark}: ").split()
             r, c = int(r), int(c)
         except ValueError:
             print("You should enter numbers!")
@@ -85,11 +83,15 @@ def get_result():
         return "X wins"
     if o_win:
         return "O wins"
-    if field.count(x) + field.count(o) == len(field):
+    if len(field) == field.count(x) + field.count(o):
         return "Draw"
     if any([mark not in (x, o) for mark in field]):
         return "Game not finished"
 
+
+def change_player():
+    global mark
+    mark = o if mark == x else x
 
 if __name__ == '__main__':
     main()

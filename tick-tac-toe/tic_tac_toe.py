@@ -1,8 +1,34 @@
-# Analyze user input and show messages in the following situations:
-# - "This cell is occupied! Choose another one!" - if the cell is not empty;
-# - "You should enter numbers!" - if the user enters other symbols;
-# - "Coordinates should be from 1 to 3!" - if the user goes beyond the field.
-# Then output the table including the user's most recent move.
+"""
+This is the "tic-tac-toe game" module.
+
+
+"""
+
+# field marks
+x = 'X'
+o = 'O'
+
+# user mark
+mark = x
+
+
+def main():
+
+    global field
+
+    # Get the 3x3 field from the input.
+    field = input("Enter cells: ")
+
+    # Output this 3x3 field with cells before the user's move.
+    print_field()
+
+    # Ask the user about his next move.
+    r, c = get_coordinates()
+
+    update_field(r, c, mark)
+
+    # Output this 3x3 field with cells after the user's move.
+    print_field()
 
 
 def print_field():
@@ -16,7 +42,7 @@ def print_field():
 def get_coordinates():
     while True:
         try:
-            r, c = input("Enter the coordinates: ").split()
+            c, r = input("Enter the coordinates: ").split()
             r, c = int(r), int(c)
         except ValueError:
             print("You should enter numbers!")
@@ -29,24 +55,22 @@ def get_coordinates():
             continue
         return r, c
 
+
 def update_field(r, c, mark):
     global field
-    field_lst =  list(field)
+    field_lst = list(field)
     field_lst[(3 - r) * 3 + c - 1] = mark
     field = ''.join(field_lst)
 
 
 def is_win(mark):
-    return any([
-        all([field[int(i)] == mark for i in r1]),
-        all([field[int(i)] == mark for i in r2]),
-        all([field[int(i)] == mark for i in r3]),
-        all([field[int(i)] == mark for i in c1]),
-        all([field[int(i)] == mark for i in c2]),
-        all([field[int(i)] == mark for i in c3]),
-        all([field[int(i)] == mark for i in md]),
-        all([field[int(i)] == mark for i in ad]),
-    ])
+    # rows, columns, diagonal field indexes that wins placed in line
+    winline = {'r1': '012', 'r2': '345', 'r3': '678', 'c1': '036', 'c2': '147', 'c3': '258', 'md': '048', 'ad': '246'}
+
+    for line in winline.values():
+        if all([field[int(i)] == mark for i in line]):
+            return True
+    return False
 
 
 def get_result():
@@ -66,53 +90,6 @@ def get_result():
     if any([mark not in (x, o) for mark in field]):
         return "Game not finished"
 
-
-def main():
-    # Enter cells: > X_X_O____
-    # ---------
-    # | X   X |
-    # |   O   |
-    # |       |
-    # ---------
-    # Enter the coordinates: > 1 1
-    # ---------
-    # | X   X |
-    # |   O   |
-    # | X     |
-    # ---------
-
-    global field
-
-    # Get the 3x3 field from the input.
-    field = input("Enter cells: ")
-
-    # Output this 3x3 field with cells before the user's move.
-    print_field()
-
-    # Ask the user about his next move.
-    r, c = get_coordinates()
-
-    update_field(r, c, mark)
-
-    # Output this 3x3 field with cells after the user's move.
-    print_field()
-
-# field marks
-x = 'X'
-o = 'O'
-
-# user mark
-mark = x
-
-# field rows, columns, diagonal names
-r1 = '012'
-r2 = '345'
-r3 = '678'
-c1 = '036'
-c2 = '147'
-c3 = '258'
-md = '048'  # main diagonal
-ad = '246'  # antidiagonal
 
 if __name__ == '__main__':
     main()

@@ -1,8 +1,14 @@
 # operation
+CALC = 'calculation'
 EMPTY = ''
-HELP = '/help'
 EXIT = '/exit'
-CALC = '/calc'
+HELP = '/help'
+INVALID_EXP = 'Invalid expression'
+WRONG_CMD = 'Unknown command'
+
+NUMBER = 'number'
+OPERATOR = 'operator'
+
 ADD = '+'
 SUB = '-'
 
@@ -13,29 +19,44 @@ def main():
         action, expression = process_input()
         if action == EMPTY:
             continue
+        elif action == WRONG_CMD:
+            print(WRONG_CMD)
+        elif action == INVALID_EXP:
+            print(INVALID_EXP)
         elif action == HELP:
             show_help()
-            continue
         elif action == EXIT:
             do_exit()
             break
-        else:
+        elif action == CALC:
             do_calculation(expression)
+        else:
+            print("Unexpected behevior")
 
 
 def process_input():
     expression = input().split()
     if not expression:
-        action, expression = EMPTY, None
-    elif expression[0] in (HELP, EXIT):
-        action, expression = expression[0], None
+        return EMPTY, None
+    elif expression[0].startswith('/'):
+        return get_action(expression[0]), None
     else:
-        action, expression = CALC, clear(expression)
-    return action, expression
+        return clear(expression)
+
+
+def get_action(command):
+    if command in (HELP, EXIT):
+        return command
+    return WRONG_CMD
 
 
 def show_help():
-    print('The program calculates the sum or sub of numbers.\nExample: > -2 + 5 - -1\n4')
+    print('The program calculates the sum or sub of numbers.\n'
+          'Type /help for this Help\n'
+          '     /exit for terminate program\n'
+          'Example:\n'
+          '> -2 + 5 - -1\n'
+          '4')
 
 
 def do_exit():
@@ -44,12 +65,22 @@ def do_exit():
 
 def clear(expression):
     # print(expression)
+    previous = None
     for i, token in enumerate(expression):
         if is_number(token):
+            if previous == NUMBER:
+                return INVALID_EXP, None
             expression[i] = int(token)
+            previous = NUMBER
+        elif is_operator(token):
+            if previous == OPERATOR:
+                return INVALID_EXP, None
+            expression[i] = get_operation(token)
+            previous = OPERATOR
         else:
-            expression[i] = SUB if token.count(SUB) % 2 else ADD
-    return expression
+            # raise NotImplementedError("Can't handle operation", token)
+            return INVALID_EXP, None
+    return CALC, expression
 
 
 def is_number(str_):
@@ -58,6 +89,14 @@ def is_number(str_):
         return True
     except ValueError:
         return False
+
+
+def is_operator(str_):
+    return all(c in '+-' for c in str_)
+
+
+def get_operation(str_):
+    return SUB if str_.count(SUB) % 2 else ADD
 
 
 def do_calculation(expression):
@@ -79,4 +118,3 @@ def calculate(expression):
 
 if __name__ == '__main__':
     main()
-

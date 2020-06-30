@@ -1,0 +1,108 @@
+Stage 5. Error!
+
+> 8 + 7 - 4
+11
+> abc
+Invalid expression
+> 123+
+Invalid expression
+> +15
+15
+> 18 22
+Invalid expression
+
+> -22
+-22
+> 22-
+Invalid expression
+> /go
+Unknown process_command
+> /exit
+Bye!
+
+Stage 6. Variables.
+
+> n = 3
+> m=4
+> a  =   5
+> b = a
+> v=   7
+> n =9
+> count = 10
+> a = 1
+> a = 2
+> a = 3
+> a
+3
+
+Incorrect spelling or declaration of variables should also throw an exception with the corresponding message to the user:
+First, the variable is checked for correctness.
+If the user inputs an invalid variable name, then the output should be "Invalid identifier".
+> a2a
+Invalid identifier
+> n22
+Invalid identifier
+
+If a variable is valid but not declared yet, the program should print "Unknown variable".
+> a = 8
+> b = c
+Unknown variable
+> e
+Unknown variable
+
+If an identifier or value of a variable is invalid during variable declaration, the program must print a message like the one below.
+> a1 = 8
+Invalid identifier
+> n1 = a2a
+Invalid identifier
+> n = a2a
+Invalid assignment
+> a = 7 = 8
+Invalid assignment
+
+Examples:
+
+> a  =  3
+> b= 4
+> c =5
+> a + b - c
+2
+> b - c + 4 - a
+0
+> a = 800
+> a + b + c
+809
+> BIG = 9000
+> BIG
+9000
+> big
+Unknown variable
+> /exit
+Bye!
+
+Stage 7/7: I’ve got the power
+
+> 3 + 8 * ((4 + 3) * 2 + 1) - 6 / (2 + 1)  # 121
+> 8 * 3 + 12 * (4 - 2)
+48
+> 2 - 2 + 3
+3
+> 4 * (2 + 3
+Invalid expression
+> -10
+-10
+> a=4
+> b=5
+> c=6
+> a*2+b*3+c*(2+3)
+53
+> 1 +++ 2 * 3 -- 4
+11
+> 3 *** 5
+Invalid expression
+> 4+3)
+Invalid expression
+> /process_command
+Unknown process_command
+> /exit
+Bye!

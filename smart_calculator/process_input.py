@@ -18,7 +18,7 @@ def command(s):
         print('Bye!')
         sys.exit()
     else:
-        raise NameError('Unknown command')
+        raise NameError('Unknown process_command')
 
 
 def calculate(s):

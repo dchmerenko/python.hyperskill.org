@@ -4,17 +4,20 @@ EMPTY = ''
 EXIT = '/exit'
 HELP = '/help'
 INVALID_EXP = 'Invalid expression'
-WRONG_CMD = 'Unknown command'
+WRONG_CMD = 'Unknown process_command'
 
 NUMBER = 'number'
 OPERATOR = 'operator'
 
 ADD = '+'
 SUB = '-'
+ASSIGN = '='
 
+# variable
+var = {}
 
 def main():
-    # main loop
+    # process_statement loop
     while True:
         action, expression = process_input()
         if action == EMPTY:
@@ -35,13 +38,15 @@ def main():
 
 
 def process_input():
-    expression = input().split()
+    input_str = input()
+    print(input_str, end='\t')  # debug mode
+    expression = input_str.split()
     if not expression:
         return EMPTY, None
     elif expression[0].startswith('/'):
         return get_action(expression[0]), None
     else:
-        return clear(expression)
+        return get_expression(expression)
 
 
 def get_action(command):
@@ -63,7 +68,7 @@ def do_exit():
     print('Bye!')
 
 
-def clear(expression):
+def get_expression(expression):
     # print(expression)
     previous = None
     for i, token in enumerate(expression):
@@ -77,8 +82,12 @@ def clear(expression):
                 return INVALID_EXP, None
             expression[i] = get_operation(token)
             previous = OPERATOR
+        elif is_variable(token):
+            if previous == OPERATOR:
+                return INVALID_EXP, None
+            expression[i] = var[token]
+            previous = NUMBER
         else:
-            # raise NotImplementedError("Can't handle operation", token)
             return INVALID_EXP, None
     return CALC, expression
 
@@ -92,11 +101,21 @@ def is_number(str_):
 
 
 def is_operator(str_):
-    return all(c in '+-' for c in str_)
+    return (
+        all(c in '+-' for c in str_)
+        or '=' in str_
+    )
+
+
+def is_variable(token):
+    raise NotImplementedError
 
 
 def get_operation(str_):
-    return SUB if str_.count(SUB) % 2 else ADD
+    if str_.count('+') > 0 or str_.count('-') > 0:
+        return SUB if str_.count(SUB) % 2 else ADD
+    elif str_.count('=') == 1:
+        return ASSIGN
 
 
 def do_calculation(expression):
@@ -116,5 +135,60 @@ def calculate(expression):
     return result
 
 
-if __name__ == '__main__':
+def test_main():
+    import io
+    import sys
+
+    '''
+    >>> 2 + 2
+    4
+    >>> 2 2
+    Invalid expression
+    >>> /go
+    Unknown process_command
+    >>> a2a
+    Invalid identifier
+    >>> n22
+    Invalid identifier
+    >>> a = 8
+    >>> b = c
+    Unknown variable
+    >>> e
+    Unknown variable
+    >>> a1 = 8
+    Invalid identifier
+    >>> n1 = a2a
+    Invalid identifier
+    >>> n = a2a
+    Invalid assignment
+    >>> a = 7 = 8
+    Invalid assignment   
+    >>> /exit
+    Bye!
+    '''
+
+    input_str = '''2 + 2
+2 2
+/go
+a2a
+n22
+a = 8
+b = c
+e
+a1 = 8
+n1 = a2a
+n = a2a
+a = 7 = 8
+/exit
+    '''
+
+    tmp = sys.stdin
+    sys.stdin = io.StringIO(input_str)
+
     main()
+
+    sys.stdin = tmp
+
+
+if __name__ == '__main__':
+    test_main()

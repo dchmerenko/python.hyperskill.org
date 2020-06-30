@@ -1,15 +1,20 @@
 # parser.py
 
+# TODO: Wrong Error handle
+# p = Parser('5-3++2')
+# 53-Sintax error +
+# +2+
 
-class Parser:
+
+class Postfix:
     '''
     Parser converts infix notation to postfix notation (Reverse Polish Notation)
-    >>> p = Parser('5-3+2')
+    >>> p = Postfix('9 - 5 + 2')
     >>> p.expr()
-    53-2+
+    9 5 - 2 +
     '''
     def gen(self):
-        for w in self.infix_str:
+        for w in self.infix_str.split():
             yield w
 
     def __init__(self, string):
@@ -26,17 +31,17 @@ class Parser:
             if self.lookahead == '+':
                 self.match('+')
                 self.term()
-                print('+', end='')
+                print('+', end=' ')
             elif self.lookahead == '-':
                     self.match('-')
                     self.term()
-                    print('-', end='')
+                    print('-', end=' ')
             else:
                 return
 
     def term(self):
         if self.lookahead.isdigit():
-            print(self.lookahead, end='')
+            print(self.lookahead, end=' ')
             self.match(self.lookahead)
         else:
             print('Sintax error', self.lookahead)
@@ -49,6 +54,6 @@ class Parser:
 
 
 if __name__ == '__main__':
-    p = Parser('5-3+2')
-    p.expr()
+    p = Postfix('9 - 5 + 2')
+    p.expr()  # 9 5 - 2 +
     print()

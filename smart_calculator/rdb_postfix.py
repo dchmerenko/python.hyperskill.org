@@ -8,7 +8,7 @@
 
 class Postfix:
     '''
-    Parser converts infix notation to postfix notation (Reverse Polish Notation)
+    Parser converts infix notation to infix_to_postfix notation (Reverse Polish Notation)
     >>> p = Postfix('9 - 5 + 2')
     >>> p.expr()
     9 5 - 2 +

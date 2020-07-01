@@ -1,7 +1,6 @@
 # assignment.py
 
 import lib
-import evaluate as ev
 import lexer as lx
 
 from constants import *
@@ -74,7 +73,7 @@ for input_str in test_data:
             # msg += f" '{lvalue}' '{rvalue}'"
             name = lvalue
             expr = lx.lexer(rvalue)
-            var[name] = ev.evaluate(expr)
+            var[name] = lib.evaluate(expr)
             # print(msg)
         else:
             expr = lx.lexer(input_str)

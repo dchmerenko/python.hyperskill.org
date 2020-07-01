@@ -3,6 +3,20 @@
 import re
 
 
+def is_empty(s):
+    '''
+    >>> is_empty('')
+    True
+    >>> is_empty(' ')
+    True
+    >>> is_empty('\t')
+    True
+    >>> is_empty('1')
+    False
+    '''
+    return not s.strip()
+
+
 def is_number(s):
     '''
     Returns True if s is negative or positive whole number else False.
@@ -40,6 +54,14 @@ def is_valid_name(name):
     return bool(re.match(r'[A-Za-z]+$', name))
 
 
+def is_variable(token):
+    if not is_valid_name(token):
+        raise NameError(f'Invalid identifier: {token}')
+    elif token not in var:
+        raise NameError(f'Unknown variable: {token}')
+    return True
+
+
 def is_operator(s):
     '''
     >>> is_operator('+++')
@@ -68,7 +90,7 @@ def get_operator(s):
     return s
 
 
-def evaluate(a, b, op):
+def evaluate(b, a, op):
     '''
     >>> evaluate(1, 2, '+')
     3
@@ -82,13 +104,17 @@ def evaluate(a, b, op):
     1
     '''
     operation = {
-        '+': lambda a, b: a + b,
-        '-': lambda a, b: a - b,
-        '*': lambda a, b: a * b,
-        '/': lambda a, b: a // b,
-        '^': lambda a, b: a ** b,
-    }
-    return operation[op](a, b)
+            '+': lambda a, b: a + b,
+            '-': lambda a, b: a - b,
+            '*': lambda a, b: a * b,
+            '/': lambda a, b: a // b,
+            '^': lambda a, b: a ** b,
+        }
+    try:
+        return operation[op](a, b)
+    except IndexError:
+        raise NameError('Invalid expression')
+
 
 
 if __name__ == '__main__':

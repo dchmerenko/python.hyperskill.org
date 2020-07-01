@@ -5,7 +5,7 @@ def bracket_check(expr):
 
     bracket = deque()
 
-    for c in expr:
+    for c in expr.split():
         if c == '(':
             bracket.append(c)
         elif c == ')':

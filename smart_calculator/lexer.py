@@ -1,58 +1,109 @@
 # lexer.py
 
-import re
+from collections import deque
 
-from constants import *
-from test_case import test_case_run
 import lib
 
 
-def is_variable(token):
-    if not lib.is_valid_name(token):
-        raise NameError(f'Invalid identifier: {token}')
-    elif token not in var:
-        raise NameError(f'Unknown variable: {token}')
-    return True
-
-
-def lexer(input_str):
-    '''Gets an expression string and return list of values of numbers, variables and operations.
-    2 + 2 -> [2, '+', 2]
-    a + b -> [5, '+', 6]
-    '''
-    previous = None
-    expr = input_str.split()
-    for i, token in enumerate(expr):
-        if lib.is_number(token):
-            if previous == VAL:
-                raise NameError(f'Invalid expression {token}')
-            expr[i] = int(token)
-            previous = VAL
-        elif lib.is_operator(token):
-            if previous == OPR:
-                raise NameError(f'Invalid expression {token}')
-            expr[i] = lib.get_operator(token)
-            previous = OPR
-        elif is_variable(token):
-            if previous == VAL:
-                raise NameError(f'Invalid expression {token}')
-            expr[i] = var[token]
-            previous = VAL
+def lexer(expr):
+    d = deque()
+    i = 0
+    while i < len(expr):
+        if expr[i] in ' \t':
+            i += 1
+            continue
+        elif expr[i] in '*/^()':
+            d.append(expr[i])
+            i += 1
+            continue
+        elif expr[i] in '+-':
+            b = ''
+            while i < len(expr) and expr[i] in '+-':
+                b += expr[i]
+                i += 1
+            op = lib.get_operator(b)
+            d.append(op)
+            continue
+        elif expr[i].isdigit():
+            b = ''
+            while i < len(expr) and expr[i].isdigit():
+                b += expr[i]
+                i += 1
+            if (len(d) > 2 and not isinstance(d[-2], int) or len(d) == 1) and d[-1] == '-':
+                d.pop()
+                number = -int(b)
+            else:
+                number = int(b)
+            d.append(number)
+            continue
+        elif expr[i].isalpha():
+            b = ''
+            while i < len(expr) and expr[i].isalpha():
+                b += expr[i]
+                i += 1
+            if b not in var:
+                raise NameError('Unknown variable')
+            if (len(d) > 2 and not isinstance(d[-2], int) or len(d) == 1) and d[-1] == '-':
+                d.pop()
+                number = -var[b]
+            else:
+                number = var[b]
+            d.append(number)
         else:
-            raise NameError(f'Invalid expression {token}')
-    return expr
+            raise NameError(f'Invalid expression: {expr[i]}')
+
+    return ' '.join(str(_) for _ in d)
+
+
+
+def f(expr):
+    try:
+        res = lexer(expr)
+    except NameError as exc:
+        res = repr(exc)
+    return res
+
+
+def test_case_run(f, test_case):
+
+    np = [0, 0]  # [False, True]
+    w0 = w1 = w2 = 0
+
+    for test, check in test_case.items():
+        t = str(f(test))
+        np[t == check] += 1
+        w0 = len(str(test)) if w0 < len(str(test)) else w0
+        w1 = len(str(t)) if w1 < len(str(t)) else w1
+        w2 = len(str(check)) if w2 < len(str(check)) else w2
+        print(f'Check: {test:{w0}}'
+              f'\tResult: {t:{w1}}'
+              f'\tExpected: {check:{w2}}'
+              f'\tTest: {"Ok" if t == check else "Fail"}'
+        )
+
+    msg = (
+        f'\nTesting "{f.__name__}(...)" failed. {np[True]} tests passed, {np[False]} tests failed.',
+        f'\nTesting "{f.__name__}(...)" complete. All {np[True]} tests is OK.',
+    )[np[False] == 0]
+
+    print(msg)
 
 
 if __name__ == '__main__':
 
-    var = {
-        'a': 5,
-        'b': 6,
-    }
+    var = {'a': 1, 'b': 2, 'c': 3, }
 
     test_case = {
-        '2 + 2': "[2, '+', 2]",
-        'a + b': "[5, '+', 6]",
+        'a*2+b*3+c*(2+3)': '1 * 2 + 2 * 3 + 3 * ( 2 + 3 )',
+        '8 * 3 + 12 * (4 - 2)': '8 * 3 + 12 * ( 4 - 2 )',
+        '2 - 2 + 3': '2 - 2 + 3',
+        '4 * (2 + 3': '4 * ( 2 + 3',
+        '-10': '-10',
+        '-a': '-1',
+        '1 +++ 2 * 3 -- 4': '1 + 2 * 3 + 4',
+        '?': "NameError('Invalid expression: ?',)",
+        '3 *** 5': '3 * * * 5',
+        '4+3)': '4 + 3 )',
     }
 
-    test_case_run(lexer, test_case)
+    test_case_run(f, test_case)

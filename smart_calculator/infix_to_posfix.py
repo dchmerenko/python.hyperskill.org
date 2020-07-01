@@ -2,18 +2,20 @@ from collections import deque
 
 from test_case import test_case_run
 
-d = deque()
 
 operator = {'+': 0, '-': 0, '*': 1, '/': 1, '^': 2,}
+
 
 def prec(op):
     return operator[op]
 
-def postfix(expr):
+
+def infix_to_postfix(expr):
+    d = deque()
     res = []
-    for c in expr:
-        if c in ' \t':
-            continue
+    for c in expr.split():
+        # if c in ' \t':
+        #     continue
         if c in operator:
             while d and d[-1] != '(' and prec(c) <= prec(d[-1]):
                 res.append(d.pop())
@@ -28,19 +30,24 @@ def postfix(expr):
             res.append(c)
     while d:
         res.append(d.pop())
-    return ''.join(res)
+    return ' '.join(res)
 
 
 if __name__ == '__main__':
 
     test_case = {
-        'a + b*c + d': 'abc*+d+',
-        'a*b*c*d': 'ab*c*d*',
-        'a+b*c^d': 'abcd^*+',
-        'a+b*c-d*e': 'abc*+de*-',
-        '(a+b)*c': 'ab+c*',
-        'x^y/(5*z)+10': 'xy^5z*/10+',
-        ' 1+ 2 * 3': '123*+',
+        'a + b * c + d': 'a b c * + d +',
+        'a * b * c * d': 'a b * c * d *',
+        'a + b * c ^ d': 'a b c d ^ * +',
+        'a + b * c - d * e': 'a b c * + d e * -',
+        '( a + b ) * c': 'a b + c *',
+        'x ^ y / ( 5 * z ) + 10': 'x y ^ 5 z * / 10 +',
+        ' 1 + 2 * 3': '1 2 3 * +',
+        '123 + 25 ^ a': '123 25 a ^ +',
+        '-1 + -2': '-1 -2 +',
+        '-1 + 2': '-1 2 +',
+        '10 * 2 + 2 * 3 + 3 * ( 2 + 3 )': '10 2 * 2 3 * + 3 2 3 + * +',
+        '2 - 1': '2 1 -',
     }
 
-    test_case_run(postfix, test_case)
+    test_case_run(infix_to_postfix, test_case)

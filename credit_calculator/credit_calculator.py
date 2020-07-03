@@ -1,74 +1,102 @@
 import math
 
 
-def calculate_count_of_month(credit_principal, monthly_payment, credit_interest):
-    '''Calculate count of month for return a credit with annuity payments.'''
-
-    interest_rate = credit_interest / (12 * 100)
-    count_of_month = math.log(
-        monthly_payment / (monthly_payment - interest_rate * credit_principal),
-        1 + interest_rate
-    )
-    count_of_month = math.ceil(count_of_month)
-    years, months = int(count_of_month // 12), math.ceil(count_of_month % 12)
-
-    return years, months
+class Parameter:
+    '''Store calculation parameter.'''
+    def __init__(self, value, type_, prompt):
+        self.value = value
+        self.type_ = type_
+        self.prompt = prompt
 
 
-def calculate_monthly_payment(credit_principal, count_of_month, credit_interest):
-    '''Calculate monthly payment for return a credit with annuity payments.'''
+class CreditCalculator:
+    '''Credit calculator is able to work with different types of payment and to work with command-line arguments.'''
 
-    interest_rate = credit_interest / (12 * 100)
-    monthly_payment = credit_principal * interest_rate * (1 + interest_rate) ** count_of_month
-    monthly_payment /= (1 + interest_rate) ** count_of_month - 1
+    def __init__(self):
+        self.main_prompt = 'What do you want to calculate?'
+        self.option_prompt = (
+            'type "n" - for count of months,\n'
+            'type "a" - for annuity monthly payment,\n'
+            'type "p" - for credit principal:\n'
+        )
+        # 'credit_principal', 'monthly_payment', 'credit_interest', 'count_of_month'
+        self.parameters = {
+            'credit_principal': Parameter(None, int, 'Enter credit principal'),
+            'monthly_payment': Parameter(None, float, 'Enter monthly payment'),
+            'credit_interest': Parameter(None, float, 'Enter credit interest'),
+            'count_of_month': Parameter(None, int, 'Enter count of periods'),
+        }
 
-    return math.ceil(monthly_payment)
+    def run(self):
+        print(self.main_prompt)
+        option = input(self.option_prompt)
+
+        if option == 'n':  # count of month
+            self.get_parameters('credit_principal', 'monthly_payment', 'credit_interest')
+            self.print_count_of_month(self.calculate_count_of_month())
+
+        elif option == 'a':  # annuity monthly payment
+            self.get_parameters('credit_principal', 'count_of_month', 'credit_interest')
+            print(f'Your annuity payment = {self.calculate_monthly_payment()}!')
+
+        elif option == 'p':  # credit principal
+            self.get_parameters('monthly_payment', 'count_of_month', 'credit_interest')
+            print(f'Your credit principal = {self.calculate_credit_principal()}!')
+
+        else:
+            print(f'You enter wrong option: "{option}"')
+
+    def get_parameters(self, *parameter_names):
+        '''Get calculation parameters by theirs names from the input.'''
+        for p_name in parameter_names:
+            p = self.parameters[p_name]
+            p.value = p.type_(input(p.prompt + ':\n'))
+
+    def calculate_count_of_month(self):
+        '''Calculate count of month to return a credit with annuity payments.'''
+        p = self.parameters
+        interest_rate = p['credit_interest'].value / (12 * 100)
+        count_of_month = math.log(
+            (
+                p['monthly_payment'].value
+                /  # -----------------------divide the top by the bottom-----------------
+                (p['monthly_payment'].value - interest_rate * p['credit_principal'].value)
+            ),
+            1 + interest_rate
+        )
+        return math.ceil(count_of_month)  # count_of_month
+
+    def calculate_monthly_payment(self):
+        '''Calculate monthly payment to return a credit with annuity payments.'''
+        p = self.parameters
+        interest_rate = p['credit_interest'].value / (12 * 100)
+        monthly_payment = p['credit_principal'].value * interest_rate * (1 + interest_rate) ** p['count_of_month'].value
+        monthly_payment /= (1 + interest_rate) ** p['count_of_month'].value - 1
+
+        return math.ceil(monthly_payment)
+
+    def calculate_credit_principal(self):
+        '''Calculate credit principal to return a credit with annuity payments.'''
+        p = self.parameters
+        interest_rate = p['credit_interest'].value / (12 * 100)
+        credit_principal = p['monthly_payment'].value * ((1 + interest_rate) ** p['count_of_month'].value - 1)
+        credit_principal /= interest_rate * (interest_rate + 1) ** p['count_of_month'].value
+
+        return math.floor(credit_principal)
+
+    @staticmethod
+    def print_count_of_month(count_of_month):
+        '''Convert number of month to years, months form and print it.'''
+        years, months = int(count_of_month // 12), math.ceil(count_of_month % 12)
+        msg = f'You need'
+        msg += '' if years == 0 else ' 1 year' if years == 1 else f' {years} years'
+        msg += '' if months == 0 else ' and 1 month' if months == 1 else f' {months} months'
+        msg += ' to repay this credit!'
+        print(msg)
 
 
-def calculate_credit_principal(monthly_payment, count_of_month, credit_interest):
-    '''Calculate credit principal for return a credit with annuity payments.'''
+if __name__ == '__main__':
 
-    interest_rate = credit_interest / (12 * 100)
-    credit_principal = monthly_payment * ((1 + interest_rate) ** count_of_month - 1)
-    credit_principal /= interest_rate * (interest_rate + 1) ** count_of_month
+    calc = CreditCalculator()
+    calc.run()
 
-    return math.ceil(credit_principal)
-
-
-main_prompt = 'What do you want to calculate?'
-parameter_prompt = (
-    'type "n" - for count of months,\n'
-    'type "a" - for annuity monthly payment,\n'
-    'type "p" - for credit principal:\n'
-)
-
-print(main_prompt)
-parameter = input(parameter_prompt)
-
-if parameter == 'n':  # count of month
-    credit_principal = int(input('Enter credit principal:\n'))
-    monthly_payment = int(input('Enter monthly payment:\n'))
-    credit_interest = float(input('Enter credit interest:\n'))
-    years, months = calculate_count_of_month(credit_principal, monthly_payment, credit_interest)
-    msg = f'You need'
-    msg += '' if years == 0 else ' 1 year' if years == 1 else f' {years} years'
-    msg += '' if months == 0 else ' and 1 month' if months == 1 else f' {months} months'
-    msg += ' to repay this credit!'
-    print(msg)
-
-elif parameter == 'a':  # annuity monthly payment
-    credit_principal = int(input('Enter credit principal:\n'))
-    count_of_month = int(input('Enter count of periods:\n'))
-    credit_interest = float(input('Enter credit interest:\n'))
-    monthly_payment = calculate_monthly_payment(credit_principal, count_of_month, credit_interest)
-    print(f'Your annuity payment = {monthly_payment}!')
-
-elif parameter == 'p':  # credit principal
-    monthly_payment = float(input('Enter monthly payment:\n'))
-    count_of_month = int(input('Enter count of periods:\n'))
-    credit_interest = float(input('Enter credit interest:\n'))
-    credit_principal = calculate_credit_principal(monthly_payment, count_of_month, credit_interest)
-    print(f'Your credit principal = {credit_principal}!')
-
-else:
-    print(f'You enter wrong parameter: "{parameter}"')

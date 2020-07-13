@@ -116,9 +116,9 @@ class DataBase:
         return rows
 
     def delete_card(self, card_number):
-        sql = ''' DELETE FROM card WHERE number = card_number '''
+        sql = ''' DELETE FROM card WHERE number = ? '''
         cur = self.conn.cursor()
-        cur.execute(sql)
+        cur.execute(sql, (card_number,))
         self.conn.commit()
 
 
@@ -223,7 +223,8 @@ class SBS:
 
     def close_account(self):
         self.db.delete_card(self.active_card)
-        print('The account has been closed!')
+        self.active_card = None
+        print('\nThe account has been closed!\n')
 
     def log_out(self):
         self.active_card = None

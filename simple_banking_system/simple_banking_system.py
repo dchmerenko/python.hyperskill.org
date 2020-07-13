@@ -28,15 +28,14 @@ class Card:
     @staticmethod
     def get_check_sum(number):
         r = sum(int(c) if i % 2 != 0 else
-                            2 * int(c) if int(c) < 5 else
-                            2 * int(c) - 9
-                            for i, c in enumerate(number)) % 10
+                2 * int(c) if int(c) < 5 else
+                2 * int(c) - 9
+                for i, c in enumerate(number)) % 10
         return str((10 - r) % 10)
 
     @staticmethod
     def is_valid_card_number(number):
         return Card.get_check_sum(number[:-1]) == number[-1]
-
 
 
 class DataBase:

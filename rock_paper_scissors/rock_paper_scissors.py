@@ -8,10 +8,7 @@ class RockPaperScissors:
     game_results_filename = 'rating.txt'
 
     def __init__(self):
-        self.rock = 'rock'
-        self.paper = 'paper'
-        self.scissors = 'scissors'
-        self.options = [self.rock, self.paper, self.scissors]
+        self.options = ['rock', 'scissors', 'paper']
         self.computer_option = None
         self.user_name = None
         self.results = {}
@@ -26,7 +23,7 @@ class RockPaperScissors:
             with open(RockPaperScissors.game_results_filename) as f:
                 for line in f.readlines():
                     name, score = line.split()
-                    self.results[name] = score
+                    self.results[name] = int(score)
         except FileNotFoundError:
             pass
 
@@ -35,8 +32,21 @@ class RockPaperScissors:
             f.write('\n'.join(f'{name} {score}' for name, score in self.results.items()))
 
     def get_result(self, user_option):
-        """ Return 0, 1, 2 for users Lose, Draw, Win """
-        res = (self.options.index(self.computer_option) - self.options.index(user_option) + 3) % 3
+
+        res = None
+
+        u_idx = self.options.index(user_option)
+        c_idx = self.options.index(self.computer_option)
+
+        u_cap_idx = (u_idx + len(self.options) // 2) % len(self.options)  # index of an option opposite to user option
+
+        if u_idx == c_idx:
+            res = 'Draw'
+        elif u_idx < u_cap_idx:
+                res = 'Win' if u_idx < c_idx <= u_cap_idx else 'Lose'
+        elif u_idx > u_cap_idx:
+                res = 'Lose' if u_cap_idx < c_idx < u_idx else 'Win'
+        # print(user_option, computer_option, u_idx, u_cap_idx, c_idx, res, sep=', ')
         return res
 
     def print_result(self, result):
@@ -68,7 +78,7 @@ class RockPaperScissors:
             self.computer_option = random.choice(self.options)
             # print(f'My choice: {user_option}')  # for testing
             # print(f'Computer choice: {self.computer_option}')  # for testing
-            result = ('Draw', 'Lose', 'Win')[self.get_result(user_option)]
+            result = self.get_result(user_option)
             self.results[self.user_name] = (
                 self.results.setdefault(self.user_name, 0) + {'Draw': 50, 'Lose': 0, 'Win': 100}[result]
                 )

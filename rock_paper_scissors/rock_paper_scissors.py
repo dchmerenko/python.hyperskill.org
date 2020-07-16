@@ -8,7 +8,7 @@ class RockPaperScissors:
     game_results_filename = 'rating.txt'
 
     def __init__(self):
-        self.options = ['rock', 'scissors', 'paper']
+        self.options = ['rock', 'paper', 'scissors']
         self.computer_option = None
         self.user_name = None
         self.results = {}
@@ -27,6 +27,12 @@ class RockPaperScissors:
         except FileNotFoundError:
             pass
 
+    def load_options(self):
+        options_str = input()
+        if options_str:
+            self.options = options_str.split(',')
+        print("Okay, let's start")
+
     def store_results(self):
         with open(RockPaperScissors.game_results_filename, 'w') as f:
             f.write('\n'.join(f'{name} {score}' for name, score in self.results.items()))
@@ -43,10 +49,10 @@ class RockPaperScissors:
         if u_idx == c_idx:
             res = 'Draw'
         elif u_idx < u_cap_idx:
-                res = 'Win' if u_idx < c_idx <= u_cap_idx else 'Lose'
+                res = 'Lose' if u_idx < c_idx <= u_cap_idx else 'Win'
         elif u_idx > u_cap_idx:
-                res = 'Lose' if u_cap_idx < c_idx < u_idx else 'Win'
-        # print(user_option, computer_option, u_idx, u_cap_idx, c_idx, res, sep=', ')
+                res = 'Win' if u_cap_idx < c_idx < u_idx else 'Lose'
+
         return res
 
     def print_result(self, result):
@@ -60,6 +66,7 @@ class RockPaperScissors:
 
         self.greet()
         self.load_results()
+        self.load_options()
 
         while True:
 
@@ -76,26 +83,13 @@ class RockPaperScissors:
                 continue
 
             self.computer_option = random.choice(self.options)
-            # print(f'My choice: {user_option}')  # for testing
-            # print(f'Computer choice: {self.computer_option}')  # for testing
+
             result = self.get_result(user_option)
-            self.results[self.user_name] = (
-                self.results.setdefault(self.user_name, 0) + {'Draw': 50, 'Lose': 0, 'Win': 100}[result]
-                )
+            self.results[self.user_name] = (self.results.setdefault(self.user_name, 0)
+                                            + {'Draw': 50, 'Lose': 0, 'Win': 100}[result])
             self.print_result(result)
 
         self.store_results()
-
-    def test_run(self):
-        tmp_stdin = sys.stdin
-        input_str = '\n'.join(random.sample(self.options * 4, 10))
-        sys.stdin = io.StringIO(input_str)
-        while sys.stdin:
-            try:
-                self.run()
-            except EOFError:
-                break
-        sys.stdin = tmp_stdin
 
 
 if __name__ == '__main__':
